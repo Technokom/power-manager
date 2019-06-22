@@ -8,14 +8,14 @@
 class PowerControl : public QThread
 {
     Q_OBJECT
-    Q_PROPERTY(int CurrentStatus READ CurrentStatus)
+    Q_PROPERTY (int CurrentStatus READ CurrentStatus)
 public:
-    explicit PowerControl(QObject *parent = nullptr);
+    explicit PowerControl (QObject *parent = nullptr);
     void run () override;
-    int CurrentStatus();
+    int CurrentStatus ();
 
 public slots:
-    Q_NOREPLY void PowerOff(void);
+    Q_NOREPLY void PowerOff (void);
 
 
 signals:
@@ -33,10 +33,11 @@ private:
     QTimer *powerOffTimer;
     QTimer *timeoutTimer;
     int UpdateStatusPower ();
-    int RegisterService();
+    int RegisterService ();
+    void correctRtc ();
 private slots:
-    void Timeout(void);
-    void ReverseTimeout();
+    void Timeout (void);
+    void ReverseTimeout ();
 };
 
 #endif // POWERCONTROL_H

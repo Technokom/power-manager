@@ -9,13 +9,11 @@
 PowerControl::PowerControl (QObject *parent) :
     QThread (parent),
     serviceName ("ru.tknav.PowerManagerInterface"),
-    servicePath ("/ru/tknav/PowerManagerInterface")
-{
+    servicePath ("/ru/tknav/PowerManagerInterface") {
 
 }
 //--------------------------------------------------------------------
-int PowerControl::UpdateStatusPower ()
-{
+int PowerControl::UpdateStatusPower () {
     int status;
     QFile file(CHARGER_ONLINE_STATUS);
     if (file.open(QIODevice::ReadOnly)) {
@@ -28,57 +26,57 @@ int PowerControl::UpdateStatusPower ()
     return status;
 }
 //--------------------------------------------------------------------
-void PowerControl::PowerOff(void)
-{
-    system("halt -pf");
+void PowerControl::correctRtc (void) {
+    system ("hwclock -w");
 }
 //--------------------------------------------------------------------
-int PowerControl::CurrentStatus()
-{
+void PowerControl::PowerOff (void) {
+    system ("halt -p");
+}
+//--------------------------------------------------------------------
+int PowerControl::CurrentStatus () {
     return powerStatus;
 }
 //--------------------------------------------------------------------
-void PowerControl::ReverseTimeout()
-{
+void PowerControl::ReverseTimeout () {
     reverse--;
 
     emit TimeToShutdown(reverse);
 
     if (reverse < 1) {
-        PowerOff();
+        correctRtc ();
+        PowerOff ();
     }
 }
 //--------------------------------------------------------------------
-void PowerControl::Timeout()
-{
-    int measurement = UpdateStatusPower();
+void PowerControl::Timeout () {
+    int measurement = UpdateStatusPower ();
     if (measurement != powerStatus) {
         powerStatus = measurement;
         emit PowerStatusChange (powerStatus);
 
         if (powerStatus == 0) {
             reverse = TIME_TO_SHUTDOWN;
-            powerOffTimer->start(1*1000);
+            powerOffTimer->start (1*1000);
         } else {
-            powerOffTimer->stop();
+            powerOffTimer->stop ();
         }
     }
 }
 //--------------------------------------------------------------------
-int PowerControl::RegisterService()
-{
+int PowerControl::RegisterService () {
     new PMInterfaceAdaptor (this);
-    QDBusConnection connection = QDBusConnection::connectToBus(QDBusConnection::SystemBus, serviceName);
+    QDBusConnection connection = QDBusConnection::connectToBus (QDBusConnection::SystemBus, serviceName);
 
-    if (!connection.isConnected()) {
+    if (!connection.isConnected ()) {
         return -1;
     }
 
-    if (!connection.registerObject(servicePath, this)) {
+    if (!connection.registerObject (servicePath, this)) {
         return -2;
     }
 
-    if (!connection.registerService(serviceName)) {
+    if (!connection.registerService (serviceName)) {
         return -3;
     }
 
@@ -86,24 +84,23 @@ int PowerControl::RegisterService()
 }
 
 //--------------------------------------------------------------------
-void PowerControl::run ()
-{
+void PowerControl::run () {
     voltageOnBattery = -1;
     powerStatus = -1;
 
-    int registered = RegisterService();
+    int registered = RegisterService ();
     if (registered != 0) {
         qDebug() << "unable register service " << registered;
     }
 
-    timeoutTimer = new QTimer(this);
-    connect (timeoutTimer, SIGNAL(timeout()), SLOT(Timeout()));
-    timeoutTimer->setSingleShot(false);
-    timeoutTimer->start(1*1000);
+    timeoutTimer = new QTimer (this);
+    connect (timeoutTimer, SIGNAL (timeout ()), SLOT (Timeout ()));
+    timeoutTimer->setSingleShot (false);
+    timeoutTimer->start (1*1000);
 
-    powerOffTimer = new QTimer(this);
-    powerOffTimer->setSingleShot(false);
-    connect (powerOffTimer, SIGNAL(timeout()), SLOT(ReverseTimeout()));
+    powerOffTimer = new QTimer (this);
+    powerOffTimer->setSingleShot (false);
+    connect (powerOffTimer, SIGNAL (timeout()), SLOT (ReverseTimeout()));
 
 
     exec ();
