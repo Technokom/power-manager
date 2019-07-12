@@ -31,6 +31,7 @@ void PowerControl::correctRtc (void) {
 }
 //--------------------------------------------------------------------
 void PowerControl::PowerOff (void) {
+    correctRtc ();
     system ("halt -p");
 }
 //--------------------------------------------------------------------
@@ -44,7 +45,6 @@ void PowerControl::ReverseTimeout () {
     emit TimeToShutdown(reverse);
 
     if (reverse < 1) {
-        correctRtc ();
         PowerOff ();
     }
 }
