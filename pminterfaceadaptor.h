@@ -12,8 +12,12 @@ class PMInterfaceAdaptor : public QDBusAbstractAdaptor
     Q_CLASSINFO("D-Bus Introspection", ""
         "<interface name=\"ru.tknav.PowerManagerInterface\">\n"
             "<method name=\"PowerOff\"/>\n"
+            "<method name=\"Reboot\"/>\n"
             "<property access=\"read\" type=\"i\" name=\"CurrentStatus\"/>\n"
-            "<signal name=\"PowerStatusChange\">\n"
+            "<signal name=\"PowerStatusChangeCaps\">\n"
+                "<arg direction=\"out\" type=\"i\" name=\"status\" />\n"
+            "</signal>\n"
+            "<signal name=\"PowerStatusChangeV2\">\n"
                 "<arg direction=\"out\" type=\"i\" name=\"status\" />\n"
             "</signal>\n"
             "<signal name=\"TimeToShutdown\">\n"
@@ -32,8 +36,10 @@ public:
 public:
 public Q_SLOTS:
     void PowerOff();
+    void Reboot();
 
 Q_SIGNALS:
+    void PowerStatusChangeCaps (int status);
     void PowerStatusChange(int status);
     void TimeToShutdown(int time);
 };

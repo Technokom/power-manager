@@ -16,10 +16,12 @@ targetPerm.path += /etc/dbus-1/system.d
 INSTALLS += target targetPerm
 
 SOURCES += \
+    bsp.cpp \
     main.cpp \
     powercontrol.cpp \
     pminterfaceadaptor.cpp
 
 HEADERS += \
+    bsp.h \
     powercontrol.h \
     pminterfaceadaptor.h
